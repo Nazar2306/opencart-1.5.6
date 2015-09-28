@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>Start Payment Gateway Extension</id>
+    <vqmver required="true">2.5.0</vqmver>
+    <author>Manish</author>
+	
+    <file name="catalog/view/theme/default/template/checkout/checkout.tpl">
+        <operation error="skip">
+            <search position="after"><![CDATA[<?php echo $header; ?><?php echo $column_left; ?><?php echo $column_right; ?>]]></search>
+            <add><![CDATA[<script src="https://beautiful.start.payfort.com/checkout.js"></script>]]></add>
+        </operation>
+        <operation error="skip">
+            <search position="before" offset="1"><![CDATA[<?php echo $footer; ?>]]></search>
+            <add><![CDATA[function submitFormWithToken(param){
+    removePaymentToken();
+    $('input[name="payment_method"][value="payfort_start"]').parent().parent().find('td:last-child').append("<span class='start_response'><br>Your Card: xxxx-xxxx-xxxx-<b>"+param.token.card.last4+"</b> <a href='javascript:void(0)' onclick=removePaymentToken();>(Clear)</a></span>");
+    $('input[name="payment_method"][value="payfort_start"]').parent().parent().find(".start_response").append("<input type = 'hidden' name='payment_token' value = "+param.token.id+"><input type = 'hidden' name='payment_email' value = "+param.email+">");
+    $('#button-payment-method').trigger('click');
+}
+function removePaymentToken(){
+$('input[name="payment_method"][value="payfort_start"]').parent().parent().find(".start_response").remove();
+}]]></add>
+        </operation>
+                   
+        <operation error="skip">
+            <search position="after" offset="3"><![CDATA[$('#payment-method .checkout-content').prepend('<div class="warning" style="display: none;">' + json['error']['warning'] + '<img src="catalog/view/theme/default/image/close.png" alt="" class="close" /></div>');]]></search>
+            <add><![CDATA[ } else if (json['start_payment'] && $(".start_response").length ==0) {
+                StartCheckout.config({
+                    key: json['start_open_api'],
+                    formLabel: 'Ok',
+                    complete: function(params) {
+                      submitFormWithToken(params);
+                    }
+                  });
+                  StartCheckout.open({
+                    amount:   json['amount'], 
+                    currency: json['currency'],
+                    email: json['email']
+            }); ]]></add>
+        </operation>
+    </file>
+    <file name="catalog/controller/checkout/payment_method.php">
+        <operation error="skip">
+            <search position="before"><![CDATA[$this->response->setOutput(json_encode($json));]]></search>
+            <add><![CDATA[
+if(isset($this->session->data['payment_method']['code']) && $this->session->data['payment_method']['code'] == "payfort_start"){
+                    $json['start_payment'] = 1;
+                if ($this->config->get('payfort_start_test')) {
+                $start_open_api = $this->config->get('payfort_start_entry_test_open_key');
+            } else {
+                $start_open_api = $this->config->get('payfort_start_entry_live_open_key');
+            }
+            $json['start_open_api'] = $start_open_api;
+             $total_data = array();
+			$total = 0;
+			$taxes = $this->cart->getTaxes();
+
+			$this->load->model('setting/extension');
+
+			$sort_order = array(); 
+
+			$results = $this->model_setting_extension->getExtensions('total');
+
+			foreach ($results as $key => $value) {
+				$sort_order[$key] = $this->config->get($value['code'] . '_sort_order');
+			}
+
+			array_multisort($sort_order, SORT_ASC, $results);
+
+			foreach ($results as $result) {
+				if ($this->config->get($result['code'] . '_status')) {
+					$this->load->model('total/' . $result['code']);
+
+					$this->{'model_total_' . $result['code']}->getTotal($total_data, $total, $taxes);
+				}
+			}
+                        $total_key = count($total_data) - 1;
+                        $json['amount'] = $total_data[$total_key]['value'] * 100;
+                        $json['currency'] = $this->currency->getCode();
+             if(isset($this->session->data['customer_id'])){
+                    $json['email'] = $this->customer->getEmail();
+                }else{
+		   if(isset($this->session->data['guest'])){
+                         $json['email'] = $this->session->data['guest']['email'];
+                    }else{
+		         $json["email"] = "";
+		   }
+		}
+                }]]></add>
+        </operation>
+          
+    </file>
+     
+</modification>
