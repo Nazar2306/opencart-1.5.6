@@ -21,8 +21,8 @@ $('#button-confirm').bind('click', function () {
             success: function (json) {
                 if (json['error']) {
                     removePaymentToken();
-                    $('input[name="payment_method"][value="payfort_start"]').parent().append("<span class='text-danger'><br/>Card declined. Please use another card<span>");
-                    $('#accordion > div:nth-last-child(2)').find('h4.panel-title>a').trigger('click');
+                    $('input[name="payment_method"][value="payfort_start"]').parent().parent().find('td:last-child').append("<span class='error'><br/>Card declined. Please use another card<span>");
+                    $('#payment-method>.checkout-heading').find('a:first-child').trigger('click');
                 }
 
                 if (json['success']) {

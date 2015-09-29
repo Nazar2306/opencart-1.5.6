@@ -31,7 +31,7 @@ class ControllerPaymentPayfortStart extends Controller {
         $this->load->model('checkout/order');
         $order_id = $this->session->data['order_id'];
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-        $order_description = "Charge for order";
+        $order_description = "Charge for order e";
         $amount = $order_info['total'];
         $amount_in_cents = $amount * 100;
         $charge_args = array(
@@ -43,11 +43,13 @@ class ControllerPaymentPayfortStart extends Controller {
             'amount' => $amount_in_cents,
             'capture' => $capture
         );
+
         Start::setApiKey($payfort_start_secret_api);
         $json = array();
         try {
             $charge = Start_Charge::create($charge_args);
-            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('payfort_start_order_status_id'), 'Charge added: ' . $order_id, false);
+            $this->model_checkout_order->confirm($order_id, $this->config->get('config_order_status_id'));
+            $this->model_checkout_order->update($order_id, $this->config->get('payfort_start_order_status_id'), 'Charge added: ' . $order_id, false);
             $json['success'] = $this->url->link('checkout/success');
         } catch (Start_Error_Banking $e) {
             if ($e->getErrorCode() == "card_declined") {
@@ -56,9 +58,7 @@ class ControllerPaymentPayfortStart extends Controller {
                 $json['error'] = $e->getMessage();
             }
         }
-
-        $this->response->addHeader('Content-Type: application/json');
         $this->response->setOutput(json_encode($json));
     }
-
 }
+
