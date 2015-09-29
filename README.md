@@ -13,3 +13,7 @@ To install Payfort Start plugin just Upload content of /upload directory to the 
 Go to Admin > Extensions > Payments and click install next to the Payfort Start module.
 
 Click on the edit link to set up the module and add your API keys.
+
+Copyright (c) Payfort
+
+is released under the [MIT License](LICENSE).
