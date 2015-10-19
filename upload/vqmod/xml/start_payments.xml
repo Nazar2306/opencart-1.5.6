@@ -75,7 +75,8 @@ if(isset($this->session->data['payment_method']['code']) && $this->session->data
 				}
 			}
                         $total_key = count($total_data) - 1;
-                        $json['amount'] = $total_data[$total_key]['value'] * 100;
+ $amount = $this->currency->format($total_data[$total_key]['value'],"","",false);
+                        $json['amount'] =  $amount * 100;
                         $json['currency'] = $this->currency->getCode();
              if(isset($this->session->data['customer_id'])){
                     $json['email'] = $this->customer->getEmail();

@@ -32,7 +32,7 @@ class ControllerPaymentPayfortStart extends Controller {
         $order_id = $this->session->data['order_id'];
         $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
         $order_description = "Charge for order";
-        $amount = $order_info['total'];
+        $amount =  $this->currency->format($order_info['total'],"","",false);
         $amount_in_cents = $amount * 100;
         $charge_args = array(
             'description' => $order_description . ': ' . $order_id, // only 255 chars
