@@ -191,12 +191,6 @@ class ControllerPaymentPayfortStart extends Controller {
             $this->error['warning'] = $this->language->get('error_permission');
         }
 
-        if (!$this->request->post['payfort_start_entry_live_open_key']) {
-            $this->error['payfort_start_entry_live_open_key'] = $this->language->get('error_payfort_start_entry_live_open_key');
-        }
-        if (!$this->request->post['payfort_start_entry_live_secret_key']) {
-            $this->error['payfort_start_entry_live_secret_key'] = $this->language->get('error_payfort_start_entry_live_secret_key');
-        }
         if (!$this->request->post['payfort_start_entry_test_open_key']) {
             $this->error['payfort_start_entry_test_open_key'] = $this->language->get('error_payfort_start_entry_test_open_key');
         }

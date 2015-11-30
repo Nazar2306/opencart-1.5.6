@@ -17,14 +17,14 @@
       <form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form">
         <table class="form">
           <tr>
-            <td><span class="required">*</span> <?php echo $entry_live_open_key; ?></td>
+            <td><?php echo $entry_live_open_key; ?></td>
             <td><input type="text" size ="50" name="payfort_start_entry_live_open_key" value="<?php echo $payfort_start_entry_live_open_key; ?>" />
               <?php if ($error_payfort_start_entry_live_open_key) { ?>
               <span class="error"><?php echo $error_payfort_start_entry_live_open_key; ?></span>
               <?php } ?></td>
           </tr>
           <tr>
-            <td><span class="required">*</span> <?php echo $entry_live_secret_key; ?></td>
+            <td><?php echo $entry_live_secret_key; ?></td>
             <td><input type="text"  size ="50" name="payfort_start_entry_live_secret_key" value="<?php echo $payfort_start_entry_live_secret_key; ?>" />
               <?php if ($error_payfort_start_entry_live_secret_key) { ?>
               <span class="error"><?php echo $error_start_payfort_start_live_secret_key; ?></span>
