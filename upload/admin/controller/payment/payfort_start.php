@@ -2,209 +2,124 @@
 
 class ControllerPaymentPayfortStart extends Controller {
 
-    private $error = array();
-
     public function index() {
         $this->language->load('payment/payfort_start');
-
-        $this->document->setTitle($this->language->get('heading_title'));
-
-        $this->load->model('setting/setting');
-
-        if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-            $this->model_setting_setting->editSetting('payfort_start', $this->request->post);
-
-            $this->session->data['success'] = $this->language->get('text_success');
-
-            $this->redirect($this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL'));
-        }
-
-        $this->data['heading_title'] = $this->language->get('heading_title');
-
-        $this->data['text_edit'] = $this->language->get('text_edit');
-        $this->data['text_enabled'] = $this->language->get('text_enabled');
-        $this->data['text_disabled'] = $this->language->get('text_disabled');
-        $this->data['text_all_zones'] = $this->language->get('text_all_zones');
-        $this->data['text_yes'] = $this->language->get('text_yes');
-        $this->data['text_no'] = $this->language->get('text_no');
-        $this->data['text_authorization_capture'] = $this->language->get('text_authorization_capture');
-        $this->data['text_authorization_only'] = $this->language->get('text_authorization_only');
-
-        $this->data['entry_live_open_key'] = $this->language->get('entry_live_open_key');
-        $this->data['entry_live_secret_key'] = $this->language->get('entry_live_secret_key');
-        $this->data['entry_test_open_key'] = $this->language->get('entry_test_open_key');
-        $this->data['entry_test_secret_key'] = $this->language->get('entry_test_secret_key');
-
-        $this->data['entry_test'] = $this->language->get('entry_test');
-        $this->data['entry_transaction'] = $this->language->get('entry_transaction');
-        $this->data['entry_total'] = $this->language->get('entry_total');
-        $this->data['entry_order_status'] = $this->language->get('entry_order_status');
-        $this->data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
-        $this->data['entry_status'] = $this->language->get('entry_status');
-        $this->data['entry_sort_order'] = $this->language->get('entry_sort_order');
-
-        $this->data['help_test'] = $this->language->get('help_test');
-        $this->data['help_total'] = $this->language->get('help_total');
-
-        $this->data['button_save'] = $this->language->get('button_save');
-        $this->data['button_cancel'] = $this->language->get('button_cancel');
-
-
-        if (isset($this->error['warning'])) {
-            $this->data['error_warning'] = $this->error['warning'];
+        $this->data['button_confirm'] = $this->language->get('button_confirm');
+        if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/payfort_start.tpl')) {
+            $this->template = $this->config->get('config_template') . '/template/payment/payfort_start.tpl';
         } else {
-            $this->data['error_warning'] = '';
+            $this->template = 'default/template/payment/payfort_start.tpl';
         }
-
-        if (isset($this->error['payfort_start_entry_live_open_key'])) {
-            $this->data['error_payfort_start_entry_live_open_key'] = $this->error['payfort_start_entry_live_open_key'];
-        } else {
-            $this->data['error_payfort_start_entry_live_open_key'] = '';
-        }
- 
-         if (isset($this->error['payfort_start_entry_live_secret_key'])) {
-            $this->data['error_payfort_start_entry_live_secret_key'] = $this->error['payfort_start_entry_live_secret_key'];
-        } else {
-            $this->data['error_payfort_start_entry_live_secret_key'] = '';
-        }
-        
-         if (isset($this->error['payfort_start_entry_test_open_key'])) {
-            $this->data['error_payfort_start_entry_test_open_key'] = $this->error['payfort_start_entry_test_open_key'];
-        } else {
-            $this->data['error_payfort_start_entry_test_open_key'] = '';
-        }
-        
-         if (isset($this->error['payfort_start_entry_test_secret_key'])) {
-            $this->data['error_payfort_start_entry_test_secret_key'] = $this->error['payfort_start_entry_test_secret_key'];
-        } else {
-            $this->data['error_payfort_start_entry_test_secret_key'] = '';
-        }
-
-        $this->data['breadcrumbs'] = array();
-
-        $this->data['breadcrumbs'][] = array(
-            'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/home', 'token=' . $this->session->data['token'], 'SSL'),
-            'separator' => false
-        );
-
-        $this->data['breadcrumbs'][] = array(
-            'text' => $this->language->get('text_payment'),
-            'href' => $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL'),
-            'separator' => ' :: '
-        );
-
-        $this->data['breadcrumbs'][] = array(
-            'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('payment/payfort_start', 'token=' . $this->session->data['token'], 'SSL'),
-            'separator' => ' :: '
-        );
-
-        $this->data['action'] = $this->url->link('payment/payfort_start', 'token=' . $this->session->data['token'], 'SSL');
-
-        $this->data['cancel'] = $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL');
-
-        if (isset($this->request->post['payfort_start_entry_live_open_key'])) {
-            $this->data['payfort_start_entry_live_open_key'] = $this->request->post['payfort_start_entry_live_open_key'];
-        } else {
-            $this->data['payfort_start_entry_live_open_key'] = $this->config->get('payfort_start_entry_live_open_key');
-        }
-
-        if (isset($this->request->post['payfort_start_entry_live_secret_key'])) {
-            $this->data['payfort_start_entry_live_secret_key'] = $this->request->post['payfort_start_entry_live_secret_key'];
-        } else {
-            $this->data['payfort_start_entry_live_secret_key'] = $this->config->get('payfort_start_entry_live_secret_key');
-        }
-        if (isset($this->request->post['payfort_start_entry_test_open_key'])) {
-            $this->data['payfort_start_entry_test_open_key'] = $this->request->post['payfort_start_entry_test_open_key'];
-        } else {
-            $this->data['payfort_start_entry_test_open_key'] = $this->config->get('payfort_start_entry_test_open_key');
-        }
-
-        if (isset($this->request->post['payfort_start_entry_test_secret_key'])) {
-            $this->data['payfort_start_entry_test_secret_key'] = $this->request->post['payfort_start_entry_test_secret_key'];
-        } else {
-            $this->data['payfort_start_entry_test_secret_key'] = $this->config->get('payfort_start_entry_test_secret_key');
-        }
-
-        if (isset($this->request->post['payfort_start_test'])) {
-            $this->data['payfort_start_test'] = $this->request->post['payfort_start_test'];
-        } else {
-            $this->data['payfort_start_test'] = $this->config->get('payfort_start_test');
-        }
-
-        if (isset($this->request->post['payfort_start_method'])) {
-            $this->data['payfort_start_transaction'] = $this->request->post['payfort_start_transaction'];
-        } else {
-            $this->data['payfort_start_transaction'] = $this->config->get('payfort_start_transaction');
-        }
-
-        if (isset($this->request->post['payfort_start_total'])) {
-            $this->data['payfort_start_total'] = $this->request->post['payfort_start_total'];
-        } else {
-            $this->data['payfort_start_total'] = $this->config->get('payfort_start_total');
-        }
-
-        if (isset($this->request->post['payfort_start_order_status_id'])) {
-            $this->data['payfort_start_order_status_id'] = $this->request->post['payfort_start_order_status_id'];
-        } else {
-            $this->data['payfort_start_order_status_id'] = $this->config->get('payfort_start_order_status_id');
-        }
-
-        $this->load->model('localisation/order_status');
-
-        $this->data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
-
-        if (isset($this->request->post['payfort_start_geo_zone_id'])) {
-            $this->data['payfort_start_geo_zone_id'] = $this->request->post['payfort_start_geo_zone_id'];
-        } else {
-            $this->data['payfort_start_geo_zone_id'] = $this->config->get('payfort_start_geo_zone_id');
-        }
-
-        $this->load->model('localisation/geo_zone');
-
-        $this->data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
-
-        if (isset($this->request->post['payfort_start_status'])) {
-            $this->data['payfort_start_status'] = $this->request->post['payfort_start_status'];
-        } else {
-            $this->data['payfort_start_status'] = $this->config->get('payfort_start_status');
-        }
-
-        if (isset($this->request->post['payfort_start_sort_order'])) {
-            $this->data['payfort_start_sort_order'] = $this->request->post['payfort_start_sort_order'];
-        } else {
-            $this->data['payfort_start_sort_order'] = $this->config->get('payfort_start_sort_order');
-        }
-
-        $this->template = 'payment/payfort_start.tpl';
-        $this->children = array(
-            'common/header',
-            'common/footer'
-        );
-
-        $this->response->setOutput($this->render());
+        $this->render();
     }
 
-    protected function validate() {
-        if (!$this->user->hasPermission('modify', 'payment/payfort_start')) {
-            $this->error['warning'] = $this->language->get('error_permission');
-        }
-
-        if (!$this->request->post['payfort_start_entry_test_open_key']) {
-            $this->error['payfort_start_entry_test_open_key'] = $this->language->get('error_payfort_start_entry_test_open_key');
-        }
-        if (!$this->request->post['payfort_start_entry_test_secret_key']) {
-            $this->error['payfort_start_entry_test_secret_key'] = $this->language->get('error_payfort_start_entry_test_secret_key');
-        }
-
-        if (!$this->error) {
-            return true;
+    public function send() {
+        require_once './vendor/autoload.php';
+        if ($this->config->get('payfort_start_transaction')) {
+            $capture = FALSE;
         } else {
-            return false;
+            $capture = TRUE;
         }
-    }
+        if ($this->config->get('payfort_start_test')) {
+            $payfort_start_secret_api = $this->config->get('payfort_start_entry_test_secret_key');
+        } else {
+            $payfort_start_secret_api = $this->config->get('payfort_start_entry_live_secret_key');
+        }
+        $token = $_POST['payment_token'];
+        $email = $_POST['payment_email'];
+        $this->load->model('checkout/order');
+        $order_id = $this->session->data['order_id'];
+        $order = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+        $order_description = "Charge for order";
+        $amount = $order['total'];
+        if (file_exists(DIR_SYSTEM . '../data/currencies.json')) {
+            $currency_json_data = json_decode(file_get_contents(HTTP_SERVER . 'data/currencies.json'), 1);
+            $currency_multiplier = $currency_json_data[$order['currency_code']];
+        } else {
+            $currency_multiplier= 100;
+        }
+        $amount_in_cents = $amount * $currency_multiplier;
+        $version = "0.2";
+        $billing_address = array(
+            "first_name" => $order['payment_firstname'],
+            "last_name" => $order['payment_lastname'],
+            "country" => $order['payment_country'],
+            "city" => $order['payment_city'],
+            "address_1" => $order['payment_address_1'],
+            "address_2" => $order['payment_address_2'],
+            "phone" => $order['telephone'],
+            "postcode" => $order['payment_postcode']
+        );
+	if ($this->cart->hasShipping()) {
+	    $shipping_address = array(
+	        "first_name" => $order['shipping_firstname'],
+	        "last_name" => $order['shipping_lastname'],
+	        "country" => $order['shipping_country'],
+	        "city" => $order['shipping_city'],
+	        "address_1" => $order['shipping_address_1'],
+	        "address_2" => $order['shipping_address_2'],
+	        "phone" => $order['telephone'],
+	        "postcode" => $order['shipping_postcode']
+	    );
+	}else{
+	    $shipping_address = $billing_address;
+	}
+        if ($order['customer_id'] != 0) {
+            $this->load->model('account/customer');
+            $customer_info = $this->model_account_customer->getCustomer($this->customer->getId());
+        }
 
+        $user_name = ($order['customer_id'] == 0) ? "guest" : $customer_info['firstname'];
+
+        $registered_at = ($order['customer_id'] == 0) ? date(DATE_ISO8601, strtotime(date("Y-m-d H:i:s"))) : date(DATE_ISO8601, strtotime($customer_info['date_added']));
+
+        $products = $this->cart->getProducts();
+        $order_items_array_full = array();
+        foreach ($products as $key => $items) {
+            $order_items_array['title'] = $items['name'];
+            $order_items_array['amount'] = $items['price'];
+            $order_items_array['quantity'] = $items['quantity'];
+            array_push($order_items_array_full, $order_items_array);
+        }
+
+        $shopping_cart_array = array(
+            'user_name' => $user_name,
+            'registered_at' => $registered_at,
+            'items' => $order_items_array_full,
+            'billing_address' => $billing_address,
+            'shipping_address' => $shipping_address
+        );
+
+        $userAgent = 'Opencart ' . VERSION . ' / Start Plugin ' . $version;
+
+        Start::setUserAgent($userAgent);
+        Start::setApiKey($payfort_start_secret_api);
+        $json = array();
+        try {
+             $charge_args = array(
+                'description' => $order_description . ': ' . $order_id, // only 255 chars
+                'card' => $token,
+                'currency' => $order['currency_code'],
+                'email' => $email,
+                'ip' => $_SERVER["REMOTE_ADDR"],
+                'amount' => $amount_in_cents,
+                'capture' => $capture,
+                'shopping_cart' => $shopping_cart_array,
+                'metadata' => array('reference_id' => $order_id)
+            );
+            $charge = Start_Charge::create($charge_args);
+            $this->model_checkout_order->confirm($order_id, $this->config->get('config_order_status_id'));
+            $this->model_checkout_order->update($order_id, $this->config->get('payfort_start_order_status_id'), 'Charge added: ' . $order_id, false);
+            $json['success'] = $this->url->link('checkout/success');
+        } catch (Start_Error_Banking $e) {
+            if ($e->getErrorCode() == "card_declined") {
+                $json['error'] = "Card declined. Please use another card";
+            } else {
+                $json['error'] = $e->getMessage();
+            }
+        }
+        $this->response->setOutput(json_encode($json));
+    }
 }
 
-?>
+

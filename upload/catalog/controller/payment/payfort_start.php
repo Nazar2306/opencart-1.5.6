@@ -30,21 +30,71 @@ class ControllerPaymentPayfortStart extends Controller {
         $email = $_POST['payment_email'];
         $this->load->model('checkout/order');
         $order_id = $this->session->data['order_id'];
-        $order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+        $order = $this->model_checkout_order->getOrder($this->session->data['order_id']);
         $order_description = "Charge for order";
-        $amount =  $this->currency->format($order_info['total'],"","",false);
-        $amount_in_cents = $amount * 100;
-        $charge_args = array(
-            'description' => $order_description . ': ' . $order_id, // only 255 chars
-            'card' => $token,
-            'currency' => $order_info['currency_code'], // only USD and AED are supported
-            'email' => $email,
-            'ip' => $_SERVER["REMOTE_ADDR"],
-            'amount' => $amount_in_cents,
-            'capture' => $capture
+        $amount = $order['total'];
+        if (file_exists(DIR_SYSTEM . '../data/currencies.json')) {
+            $currency_json_data = json_decode(file_get_contents(HTTP_SERVER . 'data/currencies.json'), 1);
+            $currency_multiplier = $currency_json_data[$order['currency_code']];
+        } else {
+            $currency_multiplier= 100;
+        }
+        $amount_in_cents = $amount * $currency_multiplier;
+        $version = "0.2";
+        $billing_address = array(
+            "first_name" => $order['payment_firstname'],
+            "last_name" => $order['payment_lastname'],
+            "country" => $order['payment_country'],
+            "city" => $order['payment_city'],
+            "address_1" => $order['payment_address_1'],
+            "address_2" => $order['payment_address_2'],
+            "phone" => $order['telephone'],
+            "postcode" => $order['payment_postcode']
+        );
+	if ($this->cart->hasShipping()) {
+	    $shipping_address = array(
+	        "first_name" => $order['shipping_firstname'],
+	        "last_name" => $order['shipping_lastname'],
+	        "country" => $order['shipping_country'],
+	        "city" => $order['shipping_city'],
+	        "address_1" => $order['shipping_address_1'],
+	        "address_2" => $order['shipping_address_2'],
+	        "phone" => $order['telephone'],
+	        "postcode" => $order['shipping_postcode']
+	    );
+	}else{
+	    $shipping_address = $billing_address;
+	}
+        if ($order['customer_id'] != 0) {
+            $this->load->model('account/customer');
+            $customer_info = $this->model_account_customer->getCustomer($this->customer->getId());
+        }
+
+        $user_name = ($order['customer_id'] == 0) ? "guest" : $customer_info['firstname'];
+
+        $registered_at = ($order['customer_id'] == 0) ? date(DATE_ISO8601, strtotime(date("Y-m-d H:i:s"))) : date(DATE_ISO8601, strtotime($customer_info['date_added']));
+
+        $products = $this->cart->getProducts();
+        $order_items_array_full = array();
+        foreach ($products as $key => $items) {
+            $order_items_array['title'] = $items['name'];
+            $order_items_array['amount'] = $items['price'];
+            $order_items_array['quantity'] = $items['quantity'];
+            array_push($order_items_array_full, $order_items_array);
+        }
+
+        $shopping_cart_array = array(
+            'user_name' => $user_name,
+            'registered_at' => $registered_at,
+            'items' => $order_items_array_full,
+            'billing_address' => $billing_address,
+            'shipping_address' => $shipping_address
         );
 
-        Start::setApiKey($payfort_start_secret_api);
+        $userAgent = 'Opencart ' . VERSION . ' / Start Plugin ' . $version;
+
+        Start::setUserAgent($userAgent);
+        Start::setApiKey($start_payments_secret_api);
         $json = array();
         try {
             $charge = Start_Charge::create($charge_args);

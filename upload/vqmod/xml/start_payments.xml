@@ -76,7 +76,13 @@ if(isset($this->session->data['payment_method']['code']) && $this->session->data
             }
             $total_key = count($total_data) - 1;
             $amount = $this->currency->format($total_data[$total_key]['value'],"","",false);
-            $json['amount'] =  $amount * 100;
+            if (file_exists(DIR_SYSTEM . '../data/currencies.json')) {
+                        $currency_json_data = json_decode(file_get_contents(HTTP_SERVER . 'data/currencies.json'), 1);
+                        $currency_multiplier = $currency_json_data[$this->currency->getCode()];
+                    } else {
+                        $currency_multiplier = 100;
+                    }
+            $json['amount'] =  $amount * $currency_multiplier;  
             $json['currency'] = $this->currency->getCode();
              if(isset($this->session->data['customer_id'])){
                     $json['email'] = $this->customer->getEmail();
