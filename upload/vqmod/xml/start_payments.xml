@@ -7,7 +7,8 @@
     <file name="catalog/view/theme/default/template/checkout/checkout.tpl">
         <operation error="skip">
             <search position="after"><![CDATA[<?php echo $header; ?><?php echo $column_left; ?><?php echo $column_right; ?>]]></search>
-            <add><![CDATA[<script src="https://beautiful.start.payfort.com/checkout.js"></script>]]></add>
+            <add><![CDATA[<script src="https://beautiful.start.payfort.com/checkout.js"></script>
+<script> var isStartCheckoutConfigured = false; </script>]]></add>
         </operation>
         <operation error="skip">
             <search position="before" offset="1"><![CDATA[<?php echo $footer; ?>]]></search>
@@ -25,6 +26,8 @@ $('input[name="payment_method"][value="payfort_start"]').parent().parent().find(
         <operation error="skip">
             <search position="after" offset="3"><![CDATA[$('#payment-method .checkout-content').prepend('<div class="warning" style="display: none;">' + json['error']['warning'] + '<img src="catalog/view/theme/default/image/close.png" alt="" class="close" /></div>');]]></search>
             <add><![CDATA[ } else if (json['start_payment'] && $(".start_response").length ==0) {
+                  if(!isStartCheckoutConfigured){
+                isStartCheckoutConfigured = true;
                 StartCheckout.config({
                     key: json['start_open_api'],
                     formLabel: 'Ok',
@@ -32,6 +35,7 @@ $('input[name="payment_method"][value="payfort_start"]').parent().parent().find(
                       submitFormWithToken(params);
                     }
                   });
+                }
                   StartCheckout.open({
                     amount:   json['amount'], 
                     currency: json['currency'],
