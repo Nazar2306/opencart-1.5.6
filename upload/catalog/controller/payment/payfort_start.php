@@ -2,6 +2,7 @@
 
 class ControllerPaymentPayfortStart extends Controller {
 
+    public $version = '0.2';
     public function index() {
         $this->language->load('payment/payfort_start');
         $this->data['button_confirm'] = $this->language->get('button_confirm');
@@ -31,7 +32,7 @@ class ControllerPaymentPayfortStart extends Controller {
         $this->load->model('checkout/order');
         $order_id = $this->session->data['order_id'];
         $order = $this->model_checkout_order->getOrder($this->session->data['order_id']);
-        $order_description = "Charge for order";
+        $order_description = "Charge for order: ";
         $amount = $order['total'];
         if (file_exists(DIR_SYSTEM . '../data/currencies.json')) {
             $currency_json_data = json_decode(file_get_contents(HTTP_SERVER . 'data/currencies.json'), 1);
@@ -40,7 +41,6 @@ class ControllerPaymentPayfortStart extends Controller {
             $currency_multiplier= 100;
         }
         $amount_in_cents = $amount * $currency_multiplier;
-        $version = "0.2";
         $billing_address = array(
             "first_name" => $order['payment_firstname'],
             "last_name" => $order['payment_lastname'],
@@ -91,7 +91,7 @@ class ControllerPaymentPayfortStart extends Controller {
             'shipping_address' => $shipping_address
         );
 
-        $userAgent = 'Opencart ' . VERSION . ' / Start Plugin ' . $version;
+        $userAgent = 'Opencart ' . VERSION . ' / Start Plugin ' . $this->version;
 
         Start::setUserAgent($userAgent);
         Start::setApiKey($start_payments_secret_api);
