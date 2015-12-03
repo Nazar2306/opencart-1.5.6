@@ -97,6 +97,17 @@ class ControllerPaymentPayfortStart extends Controller {
         Start::setApiKey($start_payments_secret_api);
         $json = array();
         try {
+              $charge_args = array(
+                'description' => $order_description . ': ' . $order_id, // only 255 chars
+                'card' => $token,
+                'currency' => $order['currency_code'],
+                'email' => $email,
+                'ip' => $_SERVER["REMOTE_ADDR"],
+                'amount' => $amount_in_cents,
+                'capture' => $capture,
+                'shopping_cart' => $shopping_cart_array,
+                'metadata' => array('reference_id' => $order_id)
+            );
             $charge = Start_Charge::create($charge_args);
             $this->model_checkout_order->confirm($order_id, $this->config->get('config_order_status_id'));
             $this->model_checkout_order->update($order_id, $this->config->get('payfort_start_order_status_id'), 'Charge added: ' . $order_id, false);
